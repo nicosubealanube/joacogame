@@ -84,9 +84,9 @@ function createBubble() {
     bubble.classList.add('bubble');
     
     // Random X position for the bubble
-    const bubbleX = Math.random() * (gameWidth - 40); // 40 is bubble width
+    const bubbleX = Math.random() * (gameWidth - 75); // 75 is bubble width
     bubble.style.left = bubbleX + 'px';
-    bubble.style.top = '-40px'; // Start above screen
+    bubble.style.top = '-75px'; // Start above screen
     
     gameArea.appendChild(bubble);
     totalBubblesSpawned++;
@@ -103,7 +103,7 @@ function createBubble() {
 }
 
 function animateBubble(bubble) {
-    let bubbleY = -40;
+    let bubbleY = -75;
     const fallSpeed = baseFallSpeed + Math.random() * 2; // Add some randomness
 
     function fall() {
