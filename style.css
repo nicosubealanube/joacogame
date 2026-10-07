@@ -1,0 +1,130 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('assets/background.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+}
+
+#score-board {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    z-index: 10;
+}
+
+#score-board h2 {
+    color: #333;
+    font-size: 24px;
+}
+
+#message {
+    font-weight: bold;
+    color: #d9534f;
+    margin-top: 10px;
+}
+
+#game-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Intro Screen & Game Over Screen */
+#intro-screen, #game-over-screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+#intro-screen h1, #game-over-screen h1 {
+    font-size: 70px;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 4px #000;
+    color: #f1c27d;
+    letter-spacing: 2px;
+}
+
+#start-btn, #retry-btn {
+    padding: 15px 40px;
+    font-size: 24px;
+    font-weight: bold;
+    background-color: #f1c27d;
+    color: #333;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    transition: transform 0.1s;
+}
+
+#start-btn:active, #retry-btn:active {
+    transform: scale(0.95);
+}
+
+#intro-screen p, #game-over-screen p {
+    font-size: 20px;
+    max-width: 500px;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* Player */
+#player {
+    position: absolute;
+    bottom: 0px;
+    left: 350px;
+    width: 75px;
+    height: 175px;
+    transition: none; /* Removed transition for smoother JS animation */
+}
+
+#player-image {
+    width: 75px; 
+    height: 175px;
+    background-image: url('assets/joaco_ai.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.bubble {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle at 15px 15px, rgba(255, 255, 255, 0.9), rgba(173, 216, 230, 0.6));
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}

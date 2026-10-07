@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joaco Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="intro-screen">
+            <h1>Joaco Game</h1>
+            <button id="start-btn">Start</button>
+            <p>usa <- o -> para mover a Joaco y explotar todas las burbujas que puedas!</p>
+        </div>
+        
+        <div id="game-over-screen" style="display: none;">
+            <h1 id="game-over-title">¡Juego Terminado!</h1>
+            <p id="game-over-msg"></p>
+            <button id="retry-btn">Reintentar</button>
+        </div>
+        
+        <div id="score-board" style="display: none;">
+            <h2>Score: <span id="score">0</span> / 100</h2>
+            <p id="message"></p>
+        </div>
+        
+        <div id="game-area" style="display: none;">
+            <div id="player">
+                <div id="player-image"></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
