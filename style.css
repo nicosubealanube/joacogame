@@ -105,14 +105,14 @@ body {
     position: absolute;
     bottom: 0px;
     left: 350px;
-    width: 75px;
-    height: 175px;
+    width: 125px;
+    height: 290px;
     transition: none; /* Removed transition for smoother JS animation */
 }
 
 #player-image {
-    width: 75px; 
-    height: 175px;
+    width: 125px; 
+    height: 290px;
     background-image: url('assets/joaco_ai.png');
     background-size: contain;
     background-position: center;

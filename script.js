@@ -12,7 +12,7 @@ const gameOverMsg = document.getElementById('game-over-msg');
 let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
 const playerSpeed = 8; // Movement speed per frame
-const playerWidth = 75;
+const playerWidth = 125;
 let playerX = (gameWidth / 2) - (playerWidth / 2); // Initial X position centered
 
 window.addEventListener('resize', () => {
