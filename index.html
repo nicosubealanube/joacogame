@@ -10,24 +10,35 @@
     <div id="game-container">
         <div id="intro-screen">
             <h1>Joaco Game</h1>
-            <button id="start-btn">Start</button>
-            <p>usa <- o -> para mover a Joaco y explotar todas las burbujas que puedas!</p>
+            <div class="mode-buttons">
+                <button id="btn-classic" class="start-btn">Clásico</button>
+                <button id="btn-2p" class="start-btn">2 Jugadores</button>
+                <button id="btn-dodge" class="start-btn">Quemado</button>
+            </div>
+            <p>usa <- o -> para mover a Joaco. (Jugador 2 usa A y D).</p>
         </div>
         
         <div id="game-over-screen" style="display: none;">
             <h1 id="game-over-title">¡Juego Terminado!</h1>
             <p id="game-over-msg"></p>
-            <button id="retry-btn">Reintentar</button>
+            <div class="action-buttons">
+                <button id="retry-btn">Reintentar</button>
+                <button id="menu-btn-gameover" class="menu-btn">Menú Principal</button>
+            </div>
         </div>
         
         <div id="score-board" style="display: none;">
             <h2>Score: <span id="score">0</span> / 100</h2>
             <p id="message"></p>
+            <button id="menu-btn-ingame" class="menu-btn">Volver al menú</button>
         </div>
         
         <div id="game-area" style="display: none;">
             <div id="player">
                 <div id="player-image"></div>
+            </div>
+            <div id="player2" style="display: none;">
+                <div id="player-image2"></div>
             </div>
         </div>
     </div>

@@ -1,25 +1,37 @@
 const player = document.getElementById('player');
+const player2 = document.getElementById('player2');
 const gameArea = document.getElementById('game-area');
 const scoreElement = document.getElementById('score');
 const messageElement = document.getElementById('message');
 const introScreen = document.getElementById('intro-screen');
-const startBtn = document.getElementById('start-btn');
+const btnClassic = document.getElementById('btn-classic');
+const btn2p = document.getElementById('btn-2p');
+const btnDodge = document.getElementById('btn-dodge');
 const scoreBoard = document.getElementById('score-board');
 const gameOverScreen = document.getElementById('game-over-screen');
 const retryBtn = document.getElementById('retry-btn');
 const gameOverMsg = document.getElementById('game-over-msg');
+const menuBtnIngame = document.getElementById('menu-btn-ingame');
+const menuBtnGameover = document.getElementById('menu-btn-gameover');
 
 let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
 const playerSpeed = 8; // Movement speed per frame
 const playerWidth = 125;
-let playerX = (gameWidth / 2) - (playerWidth / 2); // Initial X position centered
+let playerX = (gameWidth / 2) - (playerWidth / 2); // Initial X position
+let player2X = (gameWidth / 2) + (playerWidth / 2);
+
+let gameMode = 'classic'; // 'classic', '2p', 'dodge'
 
 window.addEventListener('resize', () => {
     gameWidth = window.innerWidth;
     gameHeight = window.innerHeight;
     playerX = Math.min(playerX, gameWidth - playerWidth);
+    player2X = Math.min(player2X, gameWidth - playerWidth);
     player.style.left = playerX + 'px';
+    if (gameMode === '2p') {
+        player2.style.left = player2X + 'px';
+    }
 });
 
 let score = 0;
@@ -34,7 +46,11 @@ let animationFrameId;
 // Smooth movement variables
 const keys = {
     ArrowLeft: false,
-    ArrowRight: false
+    ArrowRight: false,
+    a: false,
+    d: false,
+    A: false,
+    D: false
 };
 
 // Handle player input
@@ -53,83 +69,141 @@ document.addEventListener('keyup', (e) => {
 function gameLoop() {
     if (!gameActive) return;
 
-    // Movement logic
+    // P1 Movement logic
     if (keys.ArrowLeft) {
         playerX = Math.max(0, playerX - playerSpeed);
     }
     if (keys.ArrowRight) {
         playerX = Math.min(gameWidth - playerWidth, playerX + playerSpeed);
     }
-    
     player.style.left = playerX + 'px';
+
+    // P2 Movement logic
+    if (gameMode === '2p') {
+        if (keys.a || keys.A) {
+            player2X = Math.max(0, player2X - playerSpeed);
+        }
+        if (keys.d || keys.D) {
+            player2X = Math.min(gameWidth - playerWidth, player2X + playerSpeed);
+        }
+        player2.style.left = player2X + 'px';
+    }
 
     animationFrameId = requestAnimationFrame(gameLoop);
 }
 
-// Start button logic
-startBtn.addEventListener('click', () => {
+function startGame(mode) {
+    gameMode = mode;
     introScreen.style.display = 'none';
     scoreBoard.style.display = 'block';
     gameArea.style.display = 'block';
+    gameOverScreen.style.display = 'none';
+
+    if (gameMode === '2p') {
+        player2.style.display = 'block';
+        playerX = (gameWidth / 3) - (playerWidth / 2);
+        player2X = (gameWidth * 2 / 3) - (playerWidth / 2);
+    } else {
+        player2.style.display = 'none';
+        playerX = (gameWidth / 2) - (playerWidth / 2);
+    }
     
+    player.style.left = playerX + 'px';
+    player2.style.left = player2X + 'px';
+    
+    score = 0;
+    totalBubblesSpawned = 0;
+    baseFallSpeed = 3;
+    spawnInterval = 1000;
+    scoreElement.textContent = score;
+    
+    // Clean any remaining elements
+    document.querySelectorAll('.bubble, .ball').forEach(b => b.remove());
+
     gameActive = true;
     bubbleTimer = setInterval(createBubble, spawnInterval);
     gameLoop();
-});
+}
+
+btnClassic.addEventListener('click', () => startGame('classic'));
+btn2p.addEventListener('click', () => startGame('2p'));
+btnDodge.addEventListener('click', () => startGame('dodge'));
 
 function createBubble() {
     if (!gameActive || totalBubblesSpawned >= maxBubbles) return;
 
-    const bubble = document.createElement('div');
-    bubble.classList.add('bubble');
+    const obj = document.createElement('div');
+    obj.classList.add(gameMode === 'dodge' ? 'ball' : 'bubble');
     
-    // Random X position for the bubble
-    const bubbleX = Math.random() * (gameWidth - 75); // 75 is bubble width
-    bubble.style.left = bubbleX + 'px';
-    bubble.style.top = '-75px'; // Start above screen
+    const objWidth = 75;
+    const objX = Math.random() * (gameWidth - objWidth); 
+    obj.style.left = objX + 'px';
+    obj.style.top = '-75px'; 
     
-    gameArea.appendChild(bubble);
+    gameArea.appendChild(obj);
     totalBubblesSpawned++;
     
     // Make game harder as it progresses
     if (totalBubblesSpawned % 10 === 0) {
-        baseFallSpeed += 0.5; // Bubbles fall faster
+        baseFallSpeed += 0.5; 
         clearInterval(bubbleTimer);
-        spawnInterval = Math.max(200, spawnInterval - 100); // Spawn faster, min 200ms
+        spawnInterval = Math.max(200, spawnInterval - 100); 
         bubbleTimer = setInterval(createBubble, spawnInterval);
     }
 
-    animateBubble(bubble);
+    animateBubble(obj);
 }
 
-function animateBubble(bubble) {
-    let bubbleY = -75;
-    const fallSpeed = baseFallSpeed + Math.random() * 2; // Add some randomness
+function animateBubble(obj) {
+    let objY = -75;
+    const fallSpeed = baseFallSpeed + Math.random() * 2;
 
     function fall() {
         if (!gameActive) {
-            bubble.remove();
+            obj.remove();
             return;
         }
 
-        bubbleY += fallSpeed;
-        bubble.style.top = bubbleY + 'px';
+        objY += fallSpeed;
+        obj.style.top = objY + 'px';
 
-        // Check collision
-        if (checkCollision(bubble, player)) {
-            bubble.remove();
-            score++;
-            scoreElement.textContent = score;
-            
-            if (score >= maxBubbles) {
-                endGame("¡Ganaste! Explotaste todas las burbujas.");
+        // Check collision with Player 1
+        let collided = checkCollision(obj, player);
+        
+        // Check collision with Player 2 if in 2p mode
+        if (!collided && gameMode === '2p') {
+            collided = checkCollision(obj, player2);
+        }
+
+        if (collided) {
+            if (gameMode === 'dodge') {
+                obj.remove();
+                endGame("¡Te quemaste!");
+                return;
+            } else {
+                obj.remove();
+                score++;
+                scoreElement.textContent = score;
+                
+                if (score >= maxBubbles) {
+                    endGame("¡Ganaste! Explotaste todas las burbujas.");
+                }
+                return;
             }
-            return;
         }
 
-        // Check if bubble fell out of screen
-        if (bubbleY > gameHeight) {
-            bubble.remove();
+        // Check if object fell out of screen
+        if (objY > gameHeight) {
+            obj.remove();
+            
+            // In dodge mode, dodging adds to the score (survival)
+            if (gameMode === 'dodge') {
+                score++;
+                scoreElement.textContent = score;
+                if (score >= maxBubbles) {
+                    endGame("¡Sobreviviste! Eres el maestro de esquivar.");
+                }
+            }
         } else {
             requestAnimationFrame(fall);
         }
@@ -142,16 +216,10 @@ function checkCollision(rect1Element, rect2Element) {
     const rect1 = rect1Element.getBoundingClientRect();
     const rect2 = rect2Element.getBoundingClientRect();
 
-    // Make the collision area a bit smaller than the actual visual for better feel
-    // Specifically target the upper part of the player where the arm/finger is
     const padding = 15;
     
-    // The player's bounding rect includes the image, but we only really want to pop
-    // if the bubble touches the top area (where the finger is)
-    // The finger is around rect2.top, and extends slightly above the main body in our CSS
-    // actually, let's just use simple AABB with padding for now, but weighted towards the top half
     return !(
-        rect1.top + padding > rect2.bottom || // this handles the bottom limit
+        rect1.top + padding > rect2.bottom || 
         rect1.right - padding < rect2.left ||
         rect1.bottom - padding < rect2.top ||
         rect1.left + padding > rect2.right
@@ -164,40 +232,48 @@ function endGame(message) {
     cancelAnimationFrame(animationFrameId);
     
     let finalMsg = message;
-    if (score < maxBubbles && finalMsg === "") {
-         finalMsg = `Explotaste ${score} de ${maxBubbles} burbujas.`;
+    if (finalMsg === "") {
+        if (gameMode === 'dodge') {
+            finalMsg = `Sobreviviste a ${score} de ${maxBubbles} pelotas.`;
+        } else {
+             finalMsg = `Explotaste ${score} de ${maxBubbles} burbujas.`;
+        }
     }
     
     gameOverMsg.textContent = finalMsg;
     gameOverScreen.style.display = 'flex';
 }
 
-// Check if all bubbles finished falling
+// Check if all objects finished falling
 setInterval(() => {
-    if (gameActive && totalBubblesSpawned >= maxBubbles && document.querySelectorAll('.bubble').length === 0) {
-        endGame(""); // The specific message logic is handled inside endGame based on score
+    if (gameActive && totalBubblesSpawned >= maxBubbles && document.querySelectorAll('.bubble, .ball').length === 0) {
+        endGame("");
     }
 }, 1000);
 
 // Retry logic
 retryBtn.addEventListener('click', () => {
-    // Reset variables
-    score = 0;
-    totalBubblesSpawned = 0;
-    baseFallSpeed = 3;
-    spawnInterval = 1000;
-    playerX = (gameWidth / 2) - (playerWidth / 2);
-    player.style.left = playerX + 'px';
-    scoreElement.textContent = score;
+    startGame(gameMode);
+});
+
+
+// Return to menu logic
+function returnToMenu() {
+    gameActive = false;
+    clearInterval(bubbleTimer);
+    cancelAnimationFrame(animationFrameId);
     
-    // Clean remaining bubbles
-    document.querySelectorAll('.bubble').forEach(b => b.remove());
+    // Clean objects
+    document.querySelectorAll('.bubble, .ball').forEach(b => b.remove());
     
-    // Hide game over screen
+    // Hide game interfaces
+    gameArea.style.display = 'none';
+    scoreBoard.style.display = 'none';
     gameOverScreen.style.display = 'none';
     
-    // Start game again
-    gameActive = true;
-    bubbleTimer = setInterval(createBubble, spawnInterval);
-    gameLoop();
-});
+    // Show main menu
+    introScreen.style.display = 'flex';
+}
+
+menuBtnIngame.addEventListener('click', returnToMenu);
+menuBtnGameover.addEventListener('click', returnToMenu);

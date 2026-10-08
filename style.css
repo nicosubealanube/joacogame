@@ -76,7 +76,15 @@ body {
     letter-spacing: 2px;
 }
 
-#start-btn, #retry-btn {
+.mode-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.start-btn, #retry-btn {
     padding: 15px 40px;
     font-size: 24px;
     font-weight: bold;
@@ -85,12 +93,11 @@ body {
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    margin-bottom: 20px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.5);
     transition: transform 0.1s;
 }
 
-#start-btn:active, #retry-btn:active {
+.start-btn:active, #retry-btn:active {
     transform: scale(0.95);
 }
 
@@ -127,4 +134,63 @@ body {
     border-radius: 50%;
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
     border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+
+/* Player 2 */
+#player2 {
+    position: absolute;
+    bottom: 0px;
+    left: 350px;
+    width: 125px;
+    height: 290px;
+    transition: none;
+}
+
+#player-image2 {
+    width: 125px; 
+    height: 290px;
+    background-image: url('assets/joaco_ai.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: hue-rotate(180deg); /* Make player 2 look slightly different */
+}
+
+/* Ball (Quemado mode) */
+.ball {
+    position: absolute;
+    width: 75px;
+    height: 75px;
+    background: radial-gradient(circle at 25px 25px, #ff4e50, #c31432);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    border: 2px solid #fff;
+}
+
+
+/* Menu Buttons */
+.menu-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f1c27d;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    transition: transform 0.1s;
+    margin-top: 10px;
+}
+
+.menu-btn:active {
+    transform: scale(0.95);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
 }
