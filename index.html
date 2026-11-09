@@ -2,20 +2,582 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Joaco Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Luckiest+Guy&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Música de fondo en loop -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="assets/music.ogg" type="audio/ogg">
+        <source src="assets/music.m4a" type="audio/mp4">
+    </audio>
+
     <div id="game-container">
+        <!-- PANTALLA DE INICIO -->
         <div id="intro-screen">
-            <h1>Joaco Game</h1>
-            <div class="mode-buttons">
-                <button id="btn-classic" class="start-btn">Clásico</button>
-                <button id="btn-2p" class="start-btn">2 Jugadores</button>
-                <button id="btn-dodge" class="start-btn">Quemado</button>
+            <!-- Barra superior -->
+            <div class="top-bar">
+                <!-- Perfil Jugador (Arriba Izquierda) -->
+                <div class="profile-badge" id="profile-badge" title="Cambiar jugador">
+                    <div class="avatar-ring">
+                        <div class="avatar-inner">
+                            <img src="assets/joaco_ai.png" alt="Avatar Joaco" class="avatar-img" id="profile-avatar-img">
+                        </div>
+                    </div>
+                    <div class="profile-name-bar">
+                        <span id="player-name">JUGADOR</span>
+                    </div>
+                </div>
+
+                <!-- Monedas, Gemas, Mute y Ajustes (Arriba Derecha) -->
+                <div class="top-right-controls">
+                    <div class="currency-box" id="coins-box">
+                        <svg class="currency-icon coin-svg" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="28" fill="#f7b519" stroke="#1a1a1a" stroke-width="4.5"/>
+                            <circle cx="32" cy="32" r="23" fill="#ffd447"/>
+                            <circle cx="32" cy="32" r="16" fill="#e89e10" stroke="#c77f06" stroke-width="2.5"/>
+                            <circle cx="32" cy="32" r="14" fill="#ffbe26"/>
+                            <path d="M 18 18 A 20 20 0 0 1 42 14" stroke="#fff5b8" stroke-width="4" stroke-linecap="round" fill="none"/>
+                        </svg>
+                        <span id="coins-count" class="currency-value">0</span>
+                    </div>
+
+                    <div class="currency-box" id="gems-box">
+                        <svg class="currency-icon gem-svg" viewBox="0 0 64 64">
+                            <polygon points="18,12 46,12 58,26 32,56 6,26" fill="#2ecc71" stroke="#1a1a1a" stroke-width="4.5" stroke-linejoin="round"/>
+                            <polygon points="18,12 46,12 40,26 24,26" fill="#7ee8a8"/>
+                            <polygon points="6,26 24,26 32,56" fill="#25a25a"/>
+                            <polygon points="24,26 40,26 32,56" fill="#3be082"/>
+                            <polygon points="40,26 58,26 32,56" fill="#1e8449"/>
+                            <polygon points="6,26 18,12 24,26" fill="#52d68a"/>
+                            <polygon points="40,26 46,12 58,26" fill="#28b463"/>
+                            <polyline points="6,26 58,26" stroke="#1b6d3c" stroke-width="1.5" fill="none"/>
+                            <polyline points="18,12 24,26 32,56 40,26 46,12" stroke="#1b6d3c" stroke-width="1.5" fill="none"/>
+                        </svg>
+                        <span id="gems-count" class="currency-value">0</span>
+                    </div>
+
+                    <!-- Botón para mutear / activar música -->
+                    <button class="settings-btn" id="btn-mute" title="Silenciar / Activar música" aria-label="Música">
+                        <!-- Icono Sonido Activo -->
+                        <svg id="icon-sound-on" class="gear-svg" viewBox="0 0 64 64">
+                            <polygon points="10,24 22,24 36,12 36,52 22,40 10,40" fill="#ffd23f" stroke="#1a1a1a" stroke-width="4.5" stroke-linejoin="round"/>
+                            <path d="M43,21 C48,26 48,38 43,43" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+                            <path d="M50,14 C58,23 58,41 50,50" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+                        </svg>
+                        <!-- Icono Sonido Muteado -->
+                        <svg id="icon-sound-off" class="gear-svg" viewBox="0 0 64 64" style="display: none;">
+                            <polygon points="10,24 22,24 36,12 36,52 22,40 10,40" fill="#899197" stroke="#1a1a1a" stroke-width="4.5" stroke-linejoin="round"/>
+                            <line x1="42" y1="22" x2="56" y2="42" stroke="#ff4e50" stroke-width="6" stroke-linecap="round"/>
+                            <line x1="56" y1="22" x2="42" y2="42" stroke="#ff4e50" stroke-width="6" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+
+                    <button class="settings-btn" id="btn-settings" aria-label="Configuración">
+                        <svg class="gear-svg" viewBox="0 0 64 64">
+                            <path d="M27,8 L37,8 L39,14.5 C41.2,15.3 43.2,16.5 45,18 L51.2,15.2 L56.2,23.8 L51,28.5 C51.4,30.8 51.4,33.2 51,35.5 L56.2,40.2 L51.2,48.8 L45,46 C43.2,47.5 41.2,48.7 39,49.5 L37,56 L27,56 L25,49.5 C22.8,48.7 20.8,47.5 19,46 L12.8,48.8 L7.8,40.2 L13,35.5 C12.6,33.2 12.6,30.8 13,28.5 L7.8,23.8 L12.8,15.2 L19,18 C20.8,16.5 22.8,15.3 25,14.5 Z" fill="#6f767c" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>
+                            <circle cx="32" cy="32" r="14" fill="#899197" stroke="#454a4e" stroke-width="2"/>
+                            <circle cx="32" cy="32" r="8" fill="#4f5559" stroke="#1a1a1a" stroke-width="3.5"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <p>usa <- o -> para mover a Joaco. (Jugador 2 usa A y D).</p>
+
+            <!-- Barra lateral izquierda -->
+            <div class="left-sidebar">
+                <button class="side-nav-item" id="btn-shop">
+                    <div class="side-icon-box">
+                        <svg class="side-svg" viewBox="0 0 80 80">
+                            <!-- Carrito de compras -->
+                            <path d="M10,18 L20,18 L27,50 L60,50 L67,26 L23,26" fill="none" stroke="#15191d" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M23,26 L67,26 L60,50 L27,50 Z" fill="#3a6fa3" stroke="#15191d" stroke-width="4.5" stroke-linejoin="round"/>
+                            <!-- Rejilla del carrito -->
+                            <line x1="34" y1="27" x2="36" y2="49" stroke="#15191d" stroke-width="3.5"/>
+                            <line x1="45" y1="27" x2="45" y2="49" stroke="#15191d" stroke-width="3.5"/>
+                            <line x1="56" y1="27" x2="54" y2="49" stroke="#15191d" stroke-width="3.5"/>
+                            <line x1="25" y1="35" x2="64" y2="35" stroke="#15191d" stroke-width="3.5"/>
+                            <line x1="26" y1="43" x2="62" y2="43" stroke="#15191d" stroke-width="3.5"/>
+                            <!-- Base inferior y ruedas -->
+                            <path d="M27,50 L24,57 L58,57" fill="none" stroke="#15191d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="30" cy="64" r="6" fill="#2c353d" stroke="#15191d" stroke-width="4"/>
+                            <circle cx="54" cy="64" r="6" fill="#2c353d" stroke="#15191d" stroke-width="4"/>
+                        </svg>
+                    </div>
+                    <span class="side-label">Tienda</span>
+                </button>
+
+                <button class="side-nav-item" id="btn-competitive">
+                    <div class="side-icon-box">
+                        <svg class="side-svg" viewBox="0 0 90 80">
+                            <!-- Alas plateadas/bronce -->
+                            <path d="M8,26 C12,18 20,20 26,28 C16,32 10,36 12,44 C18,42 22,44 26,48 C18,52 16,58 26,60 L32,48 Z" fill="#a8b4be" stroke="#15191d" stroke-width="3.5" stroke-linejoin="round"/>
+                            <path d="M82,26 C78,18 70,20 64,28 C74,32 80,36 78,44 C72,42 68,44 64,48 C72,52 74,58 64,60 L58,48 Z" fill="#a8b4be" stroke="#15191d" stroke-width="3.5" stroke-linejoin="round"/>
+                            <!-- Escudo/Podio base -->
+                            <polygon points="22,26 36,20 36,56 22,50" fill="#b87343" stroke="#15191d" stroke-width="3.5" stroke-linejoin="round"/>
+                            <polygon points="68,26 54,20 54,56 68,50" fill="#9ea7ad" stroke="#15191d" stroke-width="3.5" stroke-linejoin="round"/>
+                            <polygon points="33,14 45,8 57,14 57,58 45,66 33,58" fill="#f3a833" stroke="#15191d" stroke-width="4" stroke-linejoin="round"/>
+                            <polygon points="37,17 45,12 53,17 53,55 45,61 37,55" fill="#ffc857"/>
+                            <!-- Numeros 2, 1, 3 -->
+                            <text x="29" y="43" text-anchor="middle" fill="#fff" stroke="#15191d" stroke-width="2.5" paint-order="stroke" font-family="Nunito, sans-serif" font-weight="900" font-size="15">2</text>
+                            <text x="45" y="40" text-anchor="middle" fill="#fff" stroke="#15191d" stroke-width="3" paint-order="stroke" font-family="Nunito, sans-serif" font-weight="900" font-size="20">1</text>
+                            <text x="61" y="43" text-anchor="middle" fill="#fff" stroke="#15191d" stroke-width="2.5" paint-order="stroke" font-family="Nunito, sans-serif" font-weight="900" font-size="15">3</text>
+                        </svg>
+                    </div>
+                    <span class="side-label">Competitivo</span>
+                </button>
+
+                <button class="side-nav-item" id="btn-customize">
+                    <div class="side-icon-box">
+                        <svg class="side-svg" viewBox="0 0 80 80">
+                            <!-- Remera celeste -->
+                            <path d="M25,16 L10,27 L17,40 L25,35 L25,65 L55,65 L55,35 L63,40 L70,27 L55,16 C51,23 45,25 40,25 C35,25 29,23 25,16 Z" fill="#82c8f5" stroke="#15191d" stroke-width="4" stroke-linejoin="round"/>
+                            <!-- Cuello interior -->
+                            <path d="M27,16 C31,21 35,23 40,23 C45,23 49,21 53,16 C48,18 44,19 40,19 C36,19 32,18 27,16 Z" fill="#5da6d6" stroke="#15191d" stroke-width="2.5"/>
+                            <!-- Sombra y pliegues -->
+                            <path d="M27,35 L27,63 L33,63 L31,38 Z" fill="#63b2e6" opacity="0.7"/>
+                            <path d="M48,40 C46,48 47,55 46,63" stroke="#5da6d6" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                        </svg>
+                    </div>
+                    <span class="side-label">Personalizar</span>
+                </button>
+            </div>
+
+            <!-- Contenido Central: Logo + Modos + Barra 1-2-3 -->
+            <div class="center-stage">
+                <!-- Logo Central Joaco Game -->
+                <div class="main-logo-wrapper">
+                    <div class="emblem-circle-outer">
+                        <!-- Burbujas decorativas alrededor del aro -->
+                        <span class="deco-bubble b1"></span>
+                        <span class="deco-bubble b2"></span>
+                        <span class="deco-bubble b3"></span>
+                        <span class="deco-bubble b4"></span>
+                        <span class="deco-bubble b5"></span>
+                        <span class="deco-bubble b6"></span>
+
+                        <!-- Fondo circular de azulejos -->
+                        <div class="emblem-circle-bg">
+                            <div class="bathtub-rim"></div>
+                        </div>
+
+                        <!-- Personaje Joaco sobresaliendo del circulo -->
+                        <div class="emblem-character-crop">
+                            <img src="assets/joaco_ai.png" alt="Joaco" class="emblem-joaco-img" id="main-emblem-joaco">
+                        </div>
+
+                        <!-- Burbuja grande brillante arriba a la derecha -->
+                        <div class="hero-bubble">
+                            <div class="hero-bubble-tub"></div>
+                            <div class="hero-bubble-shine"></div>
+                        </div>
+                    </div>
+
+                    <!-- Cartel blanco "Joaco Game" -->
+                    <div class="logo-plaque">
+                        <div class="logo-plaque-inner">
+                            <svg class="logo-text-svg" viewBox="0 0 460 95">
+                                <defs>
+                                    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#9ad4ff"/>
+                                        <stop offset="45%" stop-color="#69aee8"/>
+                                        <stop offset="100%" stop-color="#4582be"/>
+                                    </linearGradient>
+                                    <filter id="titleShadow" x="-10%" y="-10%" width="120%" height="130%">
+                                        <feDropShadow dx="0" dy="4" stdDeviation="0" flood-color="#1b2836"/>
+                                    </filter>
+                                </defs>
+                                <text x="230" y="68" text-anchor="middle"
+                                      font-family="'Fredoka', 'Luckiest Guy', cursive, sans-serif"
+                                      font-weight="700"
+                                      font-size="68"
+                                      letter-spacing="1"
+                                      fill="url(#titleGrad)"
+                                      stroke="#1d2b3a"
+                                      stroke-width="11"
+                                      stroke-linejoin="round"
+                                      paint-order="stroke"
+                                      filter="url(#titleShadow)">Joaco Game</text>
+                                <text x="230" y="68" text-anchor="middle"
+                                      font-family="'Fredoka', 'Luckiest Guy', cursive, sans-serif"
+                                      font-weight="700"
+                                      font-size="68"
+                                      letter-spacing="1"
+                                      fill="url(#titleGrad)">Joaco Game</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Modo de Juego -->
+                <div class="mode-buttons">
+                    <!-- Modo Clásico -->
+                    <button id="btn-classic" class="mode-card mode-blue">
+                        <span class="mode-title">Clásico</span>
+                        <div class="mode-art art-classic">
+                            <img src="assets/joaco_ai.png" alt="" class="mini-joaco classic-joaco">
+                            <div class="bubble-cluster">
+                                <span class="m-bub mb1"></span>
+                                <span class="m-bub mb2"></span>
+                                <span class="m-bub mb3"></span>
+                                <span class="m-bub mb4"></span>
+                                <span class="m-bub mb5"></span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Modo 2 Players -->
+                    <button id="btn-2p" class="mode-card mode-blue">
+                        <span class="mode-title">2 Players</span>
+                        <div class="mode-art art-2p">
+                            <img src="assets/joaco_ai.png" alt="" class="mini-joaco p2-left">
+                            <div class="bubble-cluster center-cluster">
+                                <span class="m-bub mb1"></span>
+                                <span class="m-bub mb2"></span>
+                                <span class="m-bub mb3"></span>
+                                <span class="m-bub mb4"></span>
+                                <span class="m-bub mb5"></span>
+                                <span class="m-bub mb6"></span>
+                            </div>
+                            <img src="assets/joaco_ai.png" alt="" class="mini-joaco p2-right">
+                        </div>
+                    </button>
+
+                    <!-- Modo Quemado -->
+                    <button id="btn-dodge" class="mode-card mode-orange">
+                        <span class="mode-title">Quemado</span>
+                        <div class="mode-art art-dodge">
+                            <span class="m-bub dodge-b1"></span>
+                            <img src="assets/joaco_ai.png" alt="" class="mini-joaco dodge-joaco">
+                            <span class="m-bub dodge-b2"></span>
+                            <span class="m-bub dodge-b3"></span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Barra inferior de niveles 1 - 2 - 3 -->
+                <div class="levels-banner">
+                    <div class="levels-track">
+                        <div class="level-line"></div>
+                        <button class="level-node active" data-level="1">1</button>
+                        <button class="level-node" data-level="2">2</button>
+                        <button class="level-node" data-level="3">3</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================
+             PANTALLA DE TIENDA (RULETAS DE SKINS)
+             ========================================= -->
+        <div id="shop-screen" style="display: none;">
+            <!-- Barra superior de Tienda -->
+            <div class="shop-top-bar">
+                <div class="shop-header-left">
+                    <button id="shop-back-btn" class="shop-back-btn" title="Volver al Menú">←</button>
+                    <h1 class="shop-main-title">Tienda</h1>
+                </div>
+
+                <div class="top-right-controls">
+                    <div class="currency-box">
+                        <svg class="currency-icon coin-svg" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="28" fill="#f7b519" stroke="#1a1a1a" stroke-width="4.5"/>
+                            <circle cx="32" cy="32" r="23" fill="#ffd447"/>
+                            <circle cx="32" cy="32" r="16" fill="#e89e10" stroke="#c77f06" stroke-width="2.5"/>
+                            <circle cx="32" cy="32" r="14" fill="#ffbe26"/>
+                            <path d="M 18 18 A 20 20 0 0 1 42 14" stroke="#fff5b8" stroke-width="4" stroke-linecap="round" fill="none"/>
+                        </svg>
+                        <span id="shop-coins-count" class="currency-value">0</span>
+                    </div>
+
+                    <div class="currency-box">
+                        <svg class="currency-icon gem-svg" viewBox="0 0 64 64">
+                            <polygon points="18,12 46,12 58,26 32,56 6,26" fill="#2ecc71" stroke="#1a1a1a" stroke-width="4.5" stroke-linejoin="round"/>
+                            <polygon points="18,12 46,12 40,26 24,26" fill="#7ee8a8"/>
+                            <polygon points="6,26 24,26 32,56" fill="#25a25a"/>
+                            <polygon points="24,26 40,26 32,56" fill="#3be082"/>
+                            <polygon points="40,26 58,26 32,56" fill="#1e8449"/>
+                            <polygon points="6,26 18,12 24,26" fill="#52d68a"/>
+                            <polygon points="40,26 46,12 58,26" fill="#28b463"/>
+                        </svg>
+                        <span id="shop-gems-count" class="currency-value">0</span>
+                    </div>
+
+                    <button class="settings-btn" id="shop-btn-settings" aria-label="Configuración">
+                        <svg class="gear-svg" viewBox="0 0 64 64">
+                            <path d="M27,8 L37,8 L39,14.5 C41.2,15.3 43.2,16.5 45,18 L51.2,15.2 L56.2,23.8 L51,28.5 C51.4,30.8 51.4,33.2 51,35.5 L56.2,40.2 L51.2,48.8 L45,46 C43.2,47.5 41.2,48.7 39,49.5 L37,56 L27,56 L25,49.5 C22.8,48.7 20.8,47.5 19,46 L12.8,48.8 L7.8,40.2 L13,35.5 C12.6,33.2 12.6,30.8 13,28.5 L7.8,23.8 L12.8,15.2 L19,18 C20.8,16.5 22.8,15.3 25,14.5 Z" fill="#6f767c" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>
+                            <circle cx="32" cy="32" r="14" fill="#899197" stroke="#454a4e" stroke-width="2"/>
+                            <circle cx="32" cy="32" r="8" fill="#4f5559" stroke="#1a1a1a" stroke-width="3.5"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Las 3 Tarjetas de Ruleta -->
+            <div class="roulettes-container">
+                <!-- TARJETA 1: Ruleta de Inicio -->
+                <div class="roulette-card card-starter">
+                    <div class="roulette-card-header">
+                        <h2 class="roulette-title">Ruleta de Inicio</h2>
+                        <p class="roulette-subtitle">Común o mejor!</p>
+                    </div>
+
+                    <div class="roulette-body">
+                        <!-- Rueda Izquierda -->
+                        <div class="wheel-wrapper">
+                            <div class="wheel-pointer"></div>
+                            <svg id="wheel-starter" class="wheel-svg" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="95" fill="#9a9ea2" stroke="#15191d" stroke-width="6"/>
+                                <g transform="translate(100,100)">
+                                    <path d="M0,0 L-32,-78 A84,84 0 0,1 32,-78 Z" fill="#d0d4d8" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L32,-78 A84,84 0 0,1 78,-32 Z" fill="#8c9196" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L78,-32 A84,84 0 0,1 78,32 Z" fill="#b4b8bc" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L78,32 A84,84 0 0,1 32,78 Z" fill="#686d72" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L32,78 A84,84 0 0,1 -32,78 Z" fill="#9fa4a8" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L-32,78 A84,84 0 0,1 -78,32 Z" fill="#73787d" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L-78,32 A84,84 0 0,1 -78,-32 Z" fill="#c0c4c8" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L-78,-32 A84,84 0 0,1 -32,-78 Z" fill="#62676c" stroke="#2c3136" stroke-width="3"/>
+                                </g>
+                                <circle cx="100" cy="100" r="84" fill="none" stroke="#15191d" stroke-width="5"/>
+                                <circle cx="100" cy="100" r="22" fill="#8c9196" stroke="#15191d" stroke-width="4"/>
+                                <circle cx="100" cy="100" r="13" fill="#b8bcc0" stroke="#454a4f" stroke-width="2"/>
+                            </svg>
+                        </div>
+
+                        <!-- Personaje Derecha -->
+                        <div class="roulette-showcase">
+                            <img id="preview-img-starter" src="assets/skin_cambiado.png" alt="Joaco Cambiado" class="showcase-skin-img">
+                            <div class="showcase-caption">
+                                <span id="preview-name-starter" class="showcase-skin-name">Joaco Cambiado</span>
+                                <span id="preview-rarity-starter" class="showcase-skin-rarity rarity-common">Común</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="roulette-buy-btn" data-tier="starter" data-cost="399">
+                        <svg class="buy-coin-svg" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="28" fill="#f7b519" stroke="#1a1a1a" stroke-width="4.5"/>
+                            <circle cx="32" cy="32" r="22" fill="#ffd447"/>
+                            <circle cx="32" cy="32" r="14" fill="#ffbe26" stroke="#c77f06" stroke-width="2.5"/>
+                        </svg>
+                        <span>399</span>
+                    </button>
+                </div>
+
+                <!-- TARJETA 2: Ruleta Evolucionada -->
+                <div class="roulette-card card-evolved">
+                    <div class="roulette-card-header">
+                        <h2 class="roulette-title">Ruleta Evolucionada</h2>
+                        <p class="roulette-subtitle">Raro o mejor!</p>
+                    </div>
+
+                    <div class="roulette-body">
+                        <!-- Rueda Izquierda -->
+                        <div class="wheel-wrapper">
+                            <div class="wheel-pointer"></div>
+                            <svg id="wheel-evolved" class="wheel-svg" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="95" fill="#d1ab66" stroke="#15191d" stroke-width="6"/>
+                                <g transform="translate(100,100)">
+                                    <path d="M0,0 L-32,-78 A84,84 0 0,1 32,-78 Z" fill="#ebd07d" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L32,-78 A84,84 0 0,1 78,-32 Z" fill="#5184b5" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L78,-32 A84,84 0 0,1 78,32 Z" fill="#b4cce0" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L78,32 A84,84 0 0,1 32,78 Z" fill="#4676a6" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L32,78 A84,84 0 0,1 -32,78 Z" fill="#a8c2d8" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L-32,78 A84,84 0 0,1 -78,32 Z" fill="#4b7dad" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L-78,32 A84,84 0 0,1 -78,-32 Z" fill="#bfd6e8" stroke="#2c3136" stroke-width="3"/>
+                                    <path d="M0,0 L-78,-32 A84,84 0 0,1 -32,-78 Z" fill="#3f6f9e" stroke="#2c3136" stroke-width="3"/>
+                                </g>
+                                <circle cx="100" cy="100" r="56" fill="none" stroke="#15191d" stroke-width="2.5" opacity="0.6"/>
+                                <circle cx="100" cy="100" r="84" fill="none" stroke="#15191d" stroke-width="5"/>
+                                <circle cx="100" cy="100" r="22" fill="#d4af69" stroke="#15191d" stroke-width="4"/>
+                                <circle cx="100" cy="100" r="13" fill="#f5d98e" stroke="#8a6b2f" stroke-width="2"/>
+                            </svg>
+                        </div>
+
+                        <!-- Personaje Derecha -->
+                        <div class="roulette-showcase">
+                            <img id="preview-img-evolved" src="assets/skin_planta.png" alt="JoaPlanta" class="showcase-skin-img">
+                            <div class="showcase-caption">
+                                <span id="preview-name-evolved" class="showcase-skin-name">JoaPlanta</span>
+                                <span id="preview-rarity-evolved" class="showcase-skin-rarity rarity-rare">Raro</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="roulette-buy-btn" data-tier="evolved" data-cost="1499">
+                        <svg class="buy-coin-svg" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="28" fill="#f7b519" stroke="#1a1a1a" stroke-width="4.5"/>
+                            <circle cx="32" cy="32" r="22" fill="#ffd447"/>
+                            <circle cx="32" cy="32" r="14" fill="#ffbe26" stroke="#c77f06" stroke-width="2.5"/>
+                        </svg>
+                        <span>1499</span>
+                    </button>
+                </div>
+
+                <!-- TARJETA 3: Ruleta de hackers -->
+                <div class="roulette-card card-hacker">
+                    <div class="roulette-card-header">
+                        <h2 class="roulette-title">Ruleta de hackers</h2>
+                        <p class="roulette-subtitle">Mítico o Secreto</p>
+                    </div>
+
+                    <div class="roulette-body">
+                        <!-- Rueda Izquierda -->
+                        <div class="wheel-wrapper">
+                            <div class="wheel-pointer"></div>
+                            <svg id="wheel-hacker" class="wheel-svg" viewBox="0 0 200 200">
+                                <defs>
+                                    <radialGradient id="hackerGlow" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#33f2ff"/>
+                                        <stop offset="55%" stop-color="#0b6a78"/>
+                                        <stop offset="100%" stop-color="#06222e"/>
+                                    </radialGradient>
+                                </defs>
+                                <circle cx="100" cy="100" r="95" fill="#9a7eb8" stroke="#15191d" stroke-width="6"/>
+                                <circle cx="100" cy="100" r="84" fill="url(#hackerGlow)" stroke="#15191d" stroke-width="5"/>
+                                <g transform="translate(100,100)" stroke="#1be8ff" stroke-width="1.5" opacity="0.55">
+                                    <line x1="-32" y1="-78" x2="32" y2="78"/>
+                                    <line x1="32" y1="-78" x2="-32" y2="78"/>
+                                    <line x1="-78" y1="-32" x2="78" y2="32"/>
+                                    <line x1="-78" y1="32" x2="78" y2="-32"/>
+                                </g>
+                                <!-- Texto binario Matrix -->
+                                <g fill="#4dffb8" font-family="monospace" font-weight="bold" font-size="8.5" opacity="0.85" text-anchor="middle">
+                                    <text x="100" y="38">011010010110</text>
+                                    <text x="100" y="50">1011010011010110</text>
+                                    <text x="100" y="62">110010101110010101</text>
+                                    <text x="100" y="74">01011101001011010110</text>
+                                    <text x="100" y="134">10110101101001011010</text>
+                                    <text x="100" y="146">011010011010110010</text>
+                                    <text x="100" y="158">1101010011010110</text>
+                                    <text x="100" y="170">010110100101</text>
+                                </g>
+                                <circle cx="100" cy="100" r="24" fill="#9bb8d4" stroke="#2d4c6b" stroke-width="3.5"/>
+                                <circle cx="100" cy="100" r="14" fill="#d9ecff" stroke="#5ce1ff" stroke-width="2"/>
+                            </svg>
+                        </div>
+
+                        <!-- Personaje Derecha -->
+                        <div class="roulette-showcase">
+                            <img id="preview-img-hacker" src="assets/skin_diamond.png" alt="Gold Diamond Demond" class="showcase-skin-img">
+                            <div class="showcase-caption">
+                                <span id="preview-name-hacker" class="showcase-skin-name">Gold Diamond Demond</span>
+                                <span id="preview-rarity-hacker" class="showcase-skin-rarity rarity-secret">Secreto</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="roulette-buy-btn" data-tier="hacker" data-cost="6999">
+                        <svg class="buy-coin-svg" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="28" fill="#f7b519" stroke="#1a1a1a" stroke-width="4.5"/>
+                            <circle cx="32" cy="32" r="22" fill="#ffd447"/>
+                            <circle cx="32" cy="32" r="14" fill="#ffbe26" stroke="#c77f06" stroke-width="2.5"/>
+                        </svg>
+                        <span>6999</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Barra Inferior de Pestañas de la Tienda -->
+            <div class="shop-bottom-tabs">
+                <button class="shop-tab active" id="tab-roulettes">
+                    <svg class="shop-tab-svg" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="25" fill="#9a9ea2" stroke="#15191d" stroke-width="3.5"/>
+                        <path d="M32,32 L22,10 A24,24 0 0,1 42,10 Z" fill="#d9534f" stroke="#15191d" stroke-width="2"/>
+                        <path d="M32,32 L42,10 A24,24 0 0,1 54,22 Z" fill="#5bc0de" stroke="#15191d" stroke-width="2"/>
+                        <path d="M32,32 L54,42 A24,24 0 0,1 42,54 Z" fill="#5cb85c" stroke="#15191d" stroke-width="2"/>
+                        <path d="M32,32 L22,54 A24,24 0 0,1 10,42 Z" fill="#f0ad4e" stroke="#15191d" stroke-width="2"/>
+                        <circle cx="32" cy="32" r="7" fill="#c0c4c8" stroke="#15191d" stroke-width="2.5"/>
+                        <polygon points="32,12 28,4 36,4" fill="#e74c3c" stroke="#15191d" stroke-width="2"/>
+                    </svg>
+                    <span class="shop-tab-label">Ruletas</span>
+                </button>
+
+                <button class="shop-tab" id="tab-offers">
+                    <svg class="shop-tab-svg" viewBox="0 0 64 64">
+                        <g transform="rotate(-18 32 32)">
+                            <path d="M10,20 L54,20 L54,27 A5,5 0 0,0 54,37 L54,44 L10,44 L10,37 A5,5 0 0,0 10,27 Z" fill="#c7952c" stroke="#15191d" stroke-width="3.5" stroke-linejoin="round"/>
+                            <text x="32" y="38" text-anchor="middle" fill="#15191d" font-family="Nunito, sans-serif" font-weight="900" font-size="20">%</text>
+                        </g>
+                    </svg>
+                    <span class="shop-tab-label">Ofertas</span>
+                </button>
+
+                <button class="shop-tab" id="tab-free">
+                    <svg class="shop-tab-svg" viewBox="0 0 64 64">
+                        <rect x="14" y="28" width="36" height="26" rx="3" fill="#3a78b5" stroke="#15191d" stroke-width="3.5"/>
+                        <rect x="11" y="20" width="42" height="10" rx="3" fill="#4b8fd1" stroke="#15191d" stroke-width="3.5"/>
+                        <rect x="28" y="20" width="8" height="34" fill="#c93b2b" stroke="#15191d" stroke-width="2.5"/>
+                        <rect x="14" y="36" width="36" height="7" fill="#c93b2b" stroke="#15191d" stroke-width="2.5"/>
+                        <path d="M32,20 C22,10 16,18 26,20 C28,20 30,20 32,20 Z" fill="#e04836" stroke="#15191d" stroke-width="3"/>
+                        <path d="M32,20 C42,10 48,18 38,20 C36,20 34,20 32,20 Z" fill="#e04836" stroke="#15191d" stroke-width="3"/>
+                    </svg>
+                    <span class="shop-tab-label">Gratis!</span>
+                </button>
+
+                <button class="shop-tab tab-coins-highlight" id="tab-coins">
+                    <svg class="shop-tab-svg" viewBox="0 0 64 64">
+                        <circle cx="32" cy="29" r="22" fill="#f7b519" stroke="#1a1a1a" stroke-width="3.5"/>
+                        <circle cx="32" cy="29" r="17" fill="#ffd447"/>
+                        <circle cx="32" cy="29" r="12" fill="#ffbe26" stroke="#c77f06" stroke-width="2.5"/>
+                    </svg>
+                    <span class="shop-tab-label">Monedas</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- MODAL DE PREMIO DE LA RULETA / SKIN DESBLOQUEADA -->
+        <div id="skin-win-modal" style="display: none;">
+            <div class="name-modal-card skin-win-card">
+                <h2 class="name-modal-title" id="skin-win-header">¡Nueva Skin!</h2>
+                <div class="skin-win-preview-box">
+                    <img id="skin-win-img" src="assets/skin_cambiado.png" alt="Skin ganada" class="skin-win-img">
+                </div>
+                <h3 id="skin-win-name" class="skin-win-name">Joaco Cambiado</h3>
+                <span id="skin-win-rarity" class="showcase-skin-rarity rarity-common">Común</span>
+                <div class="name-modal-actions">
+                    <button id="skin-win-close-btn" class="mode-card mode-orange modal-btn">Cerrar</button>
+                    <button id="skin-win-equip-btn" class="mode-card mode-blue modal-btn">¡Usar Skin!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE PERSONALIZAR (ARMARIO DE SKINS) -->
+        <div id="customize-modal" style="display: none;">
+            <div class="name-modal-card customize-card">
+                <h2 class="name-modal-title">Personalizar</h2>
+                <p class="name-modal-subtitle">Elige tu personaje para jugar</p>
+                <div id="skins-grid" class="skins-grid"></div>
+                <div class="name-modal-actions">
+                    <button id="customize-close-btn" class="mode-card mode-blue modal-btn">Listo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL PARA PREGUNTAR EL NOMBRE DEL JUGADOR -->
+        <div id="name-modal" style="display: none;">
+            <div class="name-modal-card">
+                <h2 class="name-modal-title">¿Cómo te llamás?</h2>
+                <p class="name-modal-subtitle">Ingresá tu nombre para guardar tus monedas</p>
+                <input type="text" id="name-input" maxlength="14" placeholder="Ej: JUAN" autocomplete="off" />
+                <div class="name-modal-actions">
+                    <button id="name-cancel-btn" class="mode-card mode-orange modal-btn">Volver</button>
+                    <button id="name-confirm-btn" class="mode-card mode-blue modal-btn">¡Jugar!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA DE PAUSA -->
+        <div id="pause-screen" style="display: none;">
+            <h1 id="pause-title">¡Juego en Pausa!</h1>
+            <p>Tomate tu tiempo, las burbujas te esperan.</p>
+            <div class="action-buttons">
+                <button id="resume-btn" class="menu-btn">Continuar</button>
+                <button id="menu-btn-pause" class="menu-btn btn-orange-style">Menú Principal</button>
+            </div>
         </div>
         
         <div id="game-over-screen" style="display: none;">
@@ -28,9 +590,22 @@
         </div>
         
         <div id="score-board" style="display: none;">
-            <h2>Score: <span id="score">0</span> / 100</h2>
+            <div class="hud-row">
+                <h2>Score: <span id="score">0</span> / 100</h2>
+                <div class="hud-coins">
+                    <svg class="hud-coin-svg" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="28" fill="#f7b519" stroke="#1a1a1a" stroke-width="5"/>
+                        <circle cx="32" cy="32" r="22" fill="#ffd447"/>
+                        <circle cx="32" cy="32" r="14" fill="#ffbe26" stroke="#c77f06" stroke-width="3"/>
+                    </svg>
+                    <span id="hud-coins-count">0</span>
+                </div>
+            </div>
             <p id="message"></p>
-            <button id="menu-btn-ingame" class="menu-btn">Volver al menú</button>
+            <div class="hud-buttons-row">
+                <button id="pause-btn-ingame" class="menu-btn btn-pause-ingame">⏸ Pausa</button>
+                <button id="menu-btn-ingame" class="menu-btn">Volver al menú</button>
+            </div>
         </div>
         
         <div id="game-area" style="display: none;">
@@ -39,6 +614,11 @@
             </div>
             <div id="player2" style="display: none;">
                 <div id="player-image2"></div>
+            </div>
+            <!-- Controles táctiles para celular / tablet -->
+            <div id="mobile-touch-controls" aria-label="Controles táctiles">
+                <button id="touch-left-btn" class="touch-dir-btn" type="button" aria-label="Mover a la izquierda">◀</button>
+                <button id="touch-right-btn" class="touch-dir-btn" type="button" aria-label="Mover a la derecha">▶</button>
             </div>
         </div>
     </div>
